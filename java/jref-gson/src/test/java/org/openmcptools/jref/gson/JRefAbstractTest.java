@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.AfterEach;
-import org.openmcptools.jref.gson.JRefTypeAdapterFactory.JRefTypeAdapter;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
