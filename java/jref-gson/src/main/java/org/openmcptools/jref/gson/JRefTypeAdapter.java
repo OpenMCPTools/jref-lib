@@ -152,9 +152,10 @@ public class JRefTypeAdapter extends TypeAdapter<Object> {
 			if (previousTSC != null) {
 				// Get ptr for previousTSC
 				JsonPointer parentPtr = JsonPointer.forPath(previousTSC, false);
-				// Get ptr from in.getJsonPointerPath()
-				JsonPointer ctxtPtr = JsonPointer.valueOf(in.getJsonPointerPath());
-
+				// Convert jsonPath...e.g. '$..name[0] to jsonPointerPath...e.g. /name/0
+				String jsonPointerPath = "/" + getJsonPointerFromJsonPath(in.getPath());
+				// Use it to get ctxtPtr
+				JsonPointer ctxtPtr = JsonPointer.valueOf(jsonPointerPath);
 				String newParentName = null;
 				// If parentPtr is same as ctxtPtr, then no newParentName
 				if (parentPtr.equals(ctxtPtr)) {
@@ -184,9 +185,10 @@ public class JRefTypeAdapter extends TypeAdapter<Object> {
 				}
 				if (newParentName != null) {
 					if (previousTSC.inArray()) {
+						// newParentName is array index
 						previousTSC = new JRefTokenStreamContext(previousTSC.parent, Integer.valueOf(newParentName));
 					} else {
-						// object without name
+						// newParentName is object name
 						previousTSC = new JRefTokenStreamContext(previousTSC.parent, newParentName);
 					}
 				}
@@ -254,4 +256,44 @@ public class JRefTypeAdapter extends TypeAdapter<Object> {
 			throw e;
 		}
 	}
+
+	private String getJsonPointerFromJsonPath(String jsonPath) throws IOException {
+		if (jsonPath.startsWith("$") || jsonPath.startsWith(".")) {
+			// remove/return '$' and '.' from jsonPath
+			return getJsonPointerFromJsonPath(jsonPath.substring(1));
+		} else {
+			StringBuffer buf = new StringBuffer();
+			int leftBracketLoc = jsonPath.indexOf('[');
+			//
+			if (leftBracketLoc == -1) {
+				// no left bracket/arrays at all...simply return
+				return jsonPath;
+			} else if (leftBracketLoc > 0) {
+				// append name to buffer
+				buf.append(jsonPath.substring(0, leftBracketLoc));
+				// get remainder
+				jsonPath = jsonPath.substring(leftBracketLoc);
+				if (!jsonPath.isEmpty()) {
+					buf.append("/").append(getJsonPointerFromJsonPath(jsonPath));
+				}
+			} else {
+				// close bracket expected
+				int closeBracketLoc = jsonPath.indexOf(']');
+				if (closeBracketLoc > -1) {
+					buf.append(jsonPath.substring(leftBracketLoc + 1, closeBracketLoc)).toString();
+					jsonPath = jsonPath.substring(closeBracketLoc + 1);
+					if (!jsonPath.isEmpty()) {
+						buf.append("/");
+						buf.append(getJsonPointerFromJsonPath(jsonPath));
+					}
+				} else {
+					throw new IOException(
+							String.format("Bad index value starting with leftBracketLoc=%s in jsonPath=%s",
+									leftBracketLoc, jsonPath));
+				}
+			}
+			return buf.toString();
+		}
+	}
+
 }
