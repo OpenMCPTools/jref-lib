@@ -1,6 +1,6 @@
 # jref-lib
 
-##What is JRef?
+## What is JRef?
 
 JSON Reference (JRef) extends JSON with a reference type. References allow for
 circular data to be serialized as JSON or for duplicated data to be serialized
