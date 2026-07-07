@@ -1,0 +1,16 @@
+{
+  "name": "JREF",
+  "version": "1.0.0",
+  "description": "",
+  "main": "JREF.js",
+  "scripts": {
+    "test": "test.js"
+  },
+  "keywords": [],
+  "author": "Scott Lewis",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "jsonpointer": "^5.0.1"
+  }
+}
