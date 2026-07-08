@@ -53,10 +53,10 @@ export function stringify(value, replacer, space) {
 	}
 	// setup map for object -> Name map
 	let map = new Map();
-	return JSON.stringify(value, function(key, v, context) {
-		let resultValue = v;
+	return JSON.stringify(value, function(key, val) {
+		let resultValue = val;
 		if (replacer != null) {
-			resultValue = replacer(key, v, context);
+			resultValue = replacer(key, val);
 		}
 		// skip null values and primitive values)
 		if (resultValue != null && resultValue === Object(resultValue)) {
