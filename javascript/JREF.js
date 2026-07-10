@@ -43,13 +43,11 @@ export function stringify(value, replacer, space) {
             this.parent = _parent;
         }
 
-        getFullName() {
-            if (this.parent == null) {
-                return ""
-            } else {
-                return this.parent.getFullName().concat("/").concat(this.name);
-            }
-        }
+		getFullName() {
+			if (this.parent == null) return "";
+			const escaped = String(this.name).replace(/~/g, '~0').replace(/\//g, '~1');
+			return this.parent.getFullName().concat("/").concat(escaped);
+		}
     }
     let map = new WeakMap();
     return JSON.stringify(value, function(key, val) {
