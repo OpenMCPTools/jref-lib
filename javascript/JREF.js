@@ -24,7 +24,7 @@ export function parse(text, reviver, space) {
             let ptr = compile(current[JREF_PROPERTY_NAME].slice(1));
             let result = ptr.get(root);
             if (result === null || result === undefined) {
-                throw new Error('Jref ptr="${ptr}" could not be resolved');
+                throw new Error(`Jref ptr="${ptr}" could not be resolved`);
             }
             return result;
         }
