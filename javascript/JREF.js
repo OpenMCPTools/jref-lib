@@ -4,26 +4,25 @@ export const JREF_PROPERTY_NAME = '$ref';
 
 export function parse(text, reviver, space) {
     function resolvePtrs(root, current) {
-        // set to root first time
+        // on first call, set current to root
         if (current === undefined) {
             current = root;
         }
-        // If null or not object just return it
+        // If current is null or primitive (not object) just return it
         if (current === null || typeof current != 'object') return current;
-        // If array then return resolvePtrs for each item
-        if (Array.isArray(current)) {
-            return current.map(item => resolvePtrs(root, item));
-        }
-        // For objects, first resolvePtrs
+		
+        // resolvePtrs of all key->value props in object (arrays included)
         for (const [key, value] of Object.entries(current)) {
             current[key] = resolvePtrs(root, value);
         }
         // if '$ref' property in current object
         if (JREF_PROPERTY_NAME in current) {
-            // compile value - '#' first character, and lookup ptr on root
-            let ptr = compile(current[JREF_PROPERTY_NAME].slice(1));
-            let result = ptr.get(root);
-            if (result === null || result === undefined) {
+            // compile value - after '#' first character rmoved
+            const ptr = compile(current[JREF_PROPERTY_NAME].slice(1));
+			// lookup/resolve ptr on root to get reference result
+            const result = ptr.get(root);
+			// reference result must not be 
+            if (!result) {
                 throw new Error(`Jref ptr="${ptr}" could not be resolved`);
             }
             return result;
