@@ -30,7 +30,8 @@ libraries in multiple languages. Here are the target implementations (more/other
 contributions and integrations welcome):
 
 * [Jackson 3](java/jref-jackson) - Status: Impl complete, tested, [upstream pr submitted](https://github.com/FasterXML/jackson-databind/pull/6045)
-* [Gson](java/gref-gson) - Status: Impl complete, tested, [updstream pr submitted](https://github.com/google/gson/pull/3050)
+* [Gson](java/gref-gson) - Status: Impl complete, tested, [upstream pr submitted](https://github.com/google/gson/pull/3050)
+* [javascript](javascript/) - Status: JREF.stringify and JREF.parse complete.  Testing begun.
 * Pydantic - Status: In progress
 
 ## Standalone JRef Impls
