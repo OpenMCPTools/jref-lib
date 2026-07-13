@@ -11,6 +11,6 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "jsonpointer": "^5.0.1"
+    "@hyperjump/json-pointer": "^1.1.2"
   }
 }
