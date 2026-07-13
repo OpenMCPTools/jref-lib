@@ -1,4 +1,4 @@
-import { compile } from 'jsonpointer';
+import * as JsonPointer from "@hyperjump/json-pointer";
 
 export const JREF_PROPERTY_NAME = '$ref';
 
@@ -17,15 +17,14 @@ export function parse(text, reviver, space) {
         }
         // if '$ref' property in current object
         if (JREF_PROPERTY_NAME in current) {
-            // compile value - after '#' first character rmoved
-            const ptr = compile(current[JREF_PROPERTY_NAME].slice(1));
+			// remove first character '#' local-only and decode URI syntax
+			const pointer = decodeURI(current[JREF_PROPERTY_NAME].slice(1));
 			// lookup/resolve ptr on root to get reference result
-            const result = ptr.get(root);
-			// reference result must not be 
-            if (!result) {
-                throw new Error(`Jref ptr="${ptr}" could not be resolved`);
-            }
-            return result;
+			try {
+            	return JsonPointer.get(pointer, root);
+			} catch (err) {
+				throw new Error(`Jref pointer="${pointer}" could not be resolved because`, { cause: err })
+			}
         }
         return current;
     }
@@ -42,10 +41,9 @@ export function stringify(value, replacer, space) {
             this.parent = _parent;
         }
 
-		getFullName() {
-			if (this.parent == null) return "";
-			const escaped = String(this.name).replace(/~/g, '~0').replace(/\//g, '~1');
-			return this.parent.getFullName().concat("/").concat(escaped);
+		getPointer() {
+			if (this.parent == null) return JsonPointer.nil;
+			return JsonPointer.append(this.name, this.parent.getPointer());
 		}
     }
     let map = new WeakMap();
@@ -54,10 +52,10 @@ export function stringify(value, replacer, space) {
         const isObj = resultValue !== null &&
             (typeof resultValue === 'object' || typeof resultValue === 'function');
         const valueName = isObj ? map.get(resultValue) : undefined;
-        const jref = valueName !== undefined ? valueName.getFullName() : undefined;
+        const jref = valueName !== undefined ? valueName.getPointer() : undefined;
 
         return jref !== undefined
-            ? (compile(jref), { [JREF_PROPERTY_NAME]: '#' + jref })
+            ? (jref, { [JREF_PROPERTY_NAME]: '#' + jref })
             : (isObj && map.set(resultValue, new Name(key, map.get(this))), resultValue);
     }, space);
 }
