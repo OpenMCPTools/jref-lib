@@ -5,7 +5,7 @@ A lightweight JavaScript utility for serializing and deserializing JSON with sup
 
 ## Overview
 
-Standard `JSON.stringify` fails when encountering circular references and duplicates object data when the same instance is referenced in multiple places. `jref-js` solves this by:
-1.  **Detecting duplicate references**: Replacing subsequent occurrences of an object with a `$ref` path.
+Standard `JSON.stringify` fails when encountering circular references and inefficiently duplicates object data when the same instance is referenced in multiple places. `jref-js` solves this by:
+1.  **Detecting duplicate references**: Replacing subsequent occurrences of an object with a JSON pointer. For complex data structures (e.g. trees) removing multiple object references rather than copying them can be significantly more efficient.
 2.  **Handling circularity**: Safely serializing objects that point back to themselves.
 3.  **Restoring object identity**: Ensuring that after parsing, multiple references to the same original object point to the same memory instance.
