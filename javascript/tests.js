@@ -1,4 +1,4 @@
-import { parse, stringify } from './JREF.js';
+import * as JREF from './JREF.js';
 
 /**
  * Test code for JREF.stringify and JREF.parse functions.
@@ -37,12 +37,12 @@ function testBasicFunctionality() {
         ]
     };
 
-    let txt = stringify(inputValue);
+    let txt = JREF.stringify(inputValue);
     console.log("stringify json=" + txt);
     assertJRefCount(txt, 1);
 
-    let result = parse(txt);
-    console.log("parse json=" + JSON.stringify(result));
+    let result = JREF.parse(txt);
+    console.log("parse json=" + result);
 
     assert(result.items[0].props === result.items[1].moreProps, "Properties should be the same instance");
     assertEquals(result.items[1].moreProps.p, 1, "Property value should be 1");
@@ -57,11 +57,11 @@ function testObjectArrayRef() {
     let o2 = o1;
     let arr = [o1, o2];
 
-    let out = stringify(arr);
+    let out = JREF.stringify(arr);
     console.log("testObjectArrayRef json=" + out);
     assertJRefCount(out, 1);
 
-    let oa = parse(out);
+    let oa = JREF.parse(out);
     assert(typeof oa[0] === 'object', "First element should be an object");
     assert(typeof oa[1] === 'object', "Second element should be an object");
     assert(oa[0] === oa[1], "Elements should be the same instance");
@@ -80,12 +80,12 @@ function testStringArrayRef() {
     let o2 = o1;
     let arr = [o1, o2];
 
-    let out = stringify(arr);
+    let out = JREF.stringify(arr);
     console.log("testStringArrayRef json=" + out);
     // In JS JREF implementation, String objects are handled by WeakMap
     assertJRefCount(out, 1);
 
-    let oa = parse(out);
+    let oa = JREF.parse(out);
     assert(oa[0].valueOf() === "one", "Value should be 'one'");
     assert(oa[0] === oa[1], "String objects should be the same instance");
 }
@@ -101,12 +101,12 @@ function test2DObjectArrayRef() {
     let arr2 = arr1;
 
     let input = [arr1, arr2];
-    let out = stringify(input);
+    let out = JREF.stringify(input);
     console.log("test2DObjectArrayRef json=" + out);
     // 1 for the second o1 reference, 1 for the second arr1 reference
     assertJRefCount(out, 2);
 
-    let oa = parse(out);
+    let oa = JREF.parse(out);
     assert(oa[0] === oa[1], "Outer array elements should be the same instance");
     assert(oa[0][0] === oa[0][1], "Inner array elements should be the same instance");
 }
@@ -122,11 +122,11 @@ function testMapValueRef() {
         "second": v1
     };
 
-    let out = stringify(mi);
+    let out = JREF.stringify(mi);
     console.log("testMapValueRef json=" + out);
     assertJRefCount(out, 1);
 
-    let mo = parse(out);
+    let mo = JREF.parse(out);
     assert(mo.first === mo.second, "Map values should be the same instance");
 }
 
@@ -143,11 +143,11 @@ function testMapValueMultRef() {
         "fourth": v1
     };
 
-    let out = stringify(mi);
+    let out = JREF.stringify(mi);
     console.log("testMapValueMultRef json=" + out);
     assertJRefCount(out, 3);
 
-    let mo = parse(out);
+    let mo = JREF.parse(out);
     assert(mo.first === mo.second, "First and second should match");
     assert(mo.first === mo.third, "First and third should match");
     assert(mo.first === mo.fourth, "First and fourth should match");
@@ -163,11 +163,11 @@ function testCircularReference() {
     a.friend = b;
     b.friend = a;
 
-    let out = stringify(a);
+    let out = JREF.stringify(a);
     console.log("testCircularReference json=" + out);
     assertJRefCount(out, 1);
 
-    let result = parse(out);
+    let result = JREF.parse(out);
     assert(result.friend.friend === result, "Circular reference should be restored");
     assertEquals(result.name, "A", "Root name should be A");
     assertEquals(result.friend.name, "B", "Friend name should be B");
@@ -184,7 +184,7 @@ function testDeeplyNestedTree() {
     const grandchild = { name: "gc1", parent: child1, root: top };
 
     const input = [top, child1, child2, grandchild];
-    const json = stringify(input);
+    const json = JREF.stringify(input);
     console.log("testDeeplyNestedTree json=" + json);
 
     // child1.parent -> top (#/0)
@@ -193,7 +193,7 @@ function testDeeplyNestedTree() {
     // grandchild.root -> top (#/0)
     assertJRefCount(json, 4);
 
-    const output = parse(json);
+    const output = JREF.parse(json);
     assert(output[1].parent === output[0], "Child1 parent should be Top");
     assert(output[2].parent === output[0], "Child2 parent should be Top");
     assert(output[3].parent === output[1], "Grandchild parent should be Child1");
@@ -213,14 +213,14 @@ function testEscapedCharactersInKeys() {
         "refs": [target1, target2]
     };
 
-    const json = stringify(input);
+    const json = JREF.stringify(input);
     console.log("testEscapedCharactersInKeys json=" + json);
 
     // Should contain escaped pointers like #/key~1with~1slashes
     assert(json.includes("~1"), "Should contain escaped slash (~1)");
     assert(json.includes("~0"), "Should contain escaped tilde (~0)");
 
-    const output = parse(json);
+    const output = JREF.parse(json);
     assert(output["key/with/slashes"] === output.refs[0], "Slash key reference failed");
     assert(output["key~with~tildes"] === output.refs[1], "Tilde key reference failed");
 }
@@ -238,10 +238,10 @@ function testMultipleRefsToSameObject() {
         d: shared
     };
 
-    const json = stringify(input);
+    const json = JREF.stringify(input);
     assertJRefCount(json, 3);
     console.log("testMultipleRefsToSameObject json=" + json);
-    const output = parse(json);
+    const output = JREF.parse(json);
     assert(output.a === output.b.nested, "Ref B failed");
     assert(output.a === output.c[0], "Ref C failed");
     assert(output.a === output.d, "Ref D failed");
@@ -255,11 +255,11 @@ function testArrayOfSameObjects() {
     const obj = { val: 42 };
     const input = [obj, obj, obj, { wrap: obj }];
 
-    const json = stringify(input);
+    const json = JREF.stringify(input);
     assertJRefCount(json, 3);
     console.log("testArrayOfSameObjects json=" + json);
 
-    const output = parse(json);
+    const output = JREF.parse(json);
     assert(output[0] === output[1], "Index 1 should ref Index 0");
     assert(output[0] === output[2], "Index 2 should ref Index 0");
     assert(output[0] === output[3].wrap, "Nested wrap should ref Index 0");
@@ -278,11 +278,11 @@ function testNullAndUndefinedValues() {
         fourth: obj
     };
 
-    const json = stringify(input);
+    const json = JREF.stringify(input);
     assertJRefCount(json, 1);
     console.log("testNullAndUndefinedValues json=" + json);
 
-    const output = parse(json);
+    const output = JREF.parse(json);
     assertEquals(output.second, null, "Null should remain null");
     assert(!("third" in output), "Undefined should be omitted by standard JSON rules");
     assert(output.first === output.fourth, "Reference after null/undefined should work");
@@ -296,11 +296,11 @@ function testMixedArrayTypes() {
     const meta = { type: "metadata" };
     const input = [1, "string", meta, true, meta, { ref: meta }];
 
-    const json = stringify(input);
+    const json = JREF.stringify(input);
     assertJRefCount(json, 2);
     console.log("testMixedArrayTypes json=" + json);
 
-    const output = parse(json);
+    const output = JREF.parse(json);
     assertEquals(output[0], 1, "Number preserved");
     assertEquals(output[1], "string", "String preserved");
     assert(output[2] === output[4], "Object ref preserved");
@@ -315,11 +315,11 @@ function testRootAsArray() {
     const item = { id: "item" };
     const input = [item, { link: item }];
 
-    const json = stringify(input);
+    const json = JREF.stringify(input);
     assert(json.startsWith("["), "Should be an array string");
     console.log("testRootAsArray json=" + json);
 
-    const output = parse(json);
+    const output = JREF.parse(json);
     assert(Array.isArray(output), "Output should be an array");
     assert(output[0] === output[1].link, "Root array indexing failed");
 }
@@ -338,10 +338,10 @@ function testCircularReferenceComplex() {
     nodeC.next = nodeA; // Loop
 
     const input = { start: nodeA, list: [nodeA, nodeB, nodeC] };
-    const json = stringify(input);
+    const json = JREF.stringify(input);
     console.log("testCircularReferenceComplex json=" + json);
 
-    const output = parse(json);
+    const output = JREF.parse(json);
     const a = output.start;
     const b = a.next;
     const c = b.next;
@@ -359,11 +359,45 @@ function testInvalidPointerResolution() {
     console.log("Running: testInvalidPointerResolution");
     const json = '{"a": {"$ref": "#/non/existent"}}';
     try {
-        parse(json);
+        JREF.parse(json);
         assert(false, "Should have thrown an error for invalid pointer");
     } catch (e) {
         assert(e.message.includes("could not be resolved"), "Error message should mention resolution failure");
     }
+}
+
+/**
+ * Tests deeply nested tree structures with multiple levels of references with replacer function
+ */
+function testDeeplyNestedTreeWithReplacerFunction() {
+    console.log("Running: testDeeplyNestedTree");
+    const top = { name: "top", data: "root-data" };
+    const child1 = { name: "child1", parent: top };
+    const child2 = { name: "child2", parent: top };
+    const grandchild = { name: "gc1", parent: child1, root: top };
+
+    const input = [top, child1, child2, grandchild];
+	
+    const json = JREF.stringify(input, 	function (key, v) {
+			console.log("replacer key="+key+",value="+v);
+			return v;
+		});
+    console.log("testDeeplyNestedTreeWithReplacerFunction json=" + json);
+
+    // child1.parent -> top (#/0)
+    // child2.parent -> top (#/0)
+    // grandchild.parent -> child1 (#/1)
+    // grandchild.root -> top (#/0)
+    assertJRefCount(json, 4);
+
+    const output = JREF.parse(json, function (key, v) {
+		console.log("reviver key="+key+",value="+v);
+		return v;
+	});
+    assert(output[1].parent === output[0], "Child1 parent should be Top");
+    assert(output[2].parent === output[0], "Child2 parent should be Top");
+    assert(output[3].parent === output[1], "Grandchild parent should be Child1");
+    assert(output[3].root === output[0], "Grandchild root should be Top");
 }
 
 // Execute the tests
@@ -386,7 +420,8 @@ try {
     testRootAsArray();
     testCircularReferenceComplex();
     testInvalidPointerResolution();
-
+	testDeeplyNestedTreeWithReplacerFunction();
+	
     console.log("\nAll tests completed successfully.");
 } catch (e) {
     console.error("Test suite failed!");
