@@ -1,0 +1,5 @@
+.github/
+oxlint.config.js
+src/tests.js
+coverage/
+tsconfig.json

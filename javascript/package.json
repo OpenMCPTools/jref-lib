@@ -1,15 +1,34 @@
 {
-  "name": "JREF",
+  "name": "@OpenMCPTools/JRef",
   "version": "1.0.0",
-  "description": "",
-  "main": "JREF.js",
+  "description": "Parse and stringify for JSON Reference (JRef).",
+  "main": "jref.js",
   "scripts": {
-    "test": "test.js"
+    "test": "node src/tests.js",
+    "lint": "oxlint",
+    "type-check": "tsc --noEmit"
   },
-  "keywords": [],
-  "author": "Scott Lewis",
-  "license": "ISC",
+  "keywords": [
+    "JRef",
+    "parse",
+    "stringify",
+    "$ref"
+  ],
+  "contributors": [
+    "Scott Lewis <scottslewis@gmail.com>",
+    "Jason Desrosiers <jdesrosi@gmail.com>",
+    "Renato <renato.marinho@gitscrum.com>"
+  ],
+  "license": "Apache-2.0",
   "type": "module",
+  "devDependencies": {
+    "@stylistic/eslint-plugin": "*",
+    "@types/node": "*",
+    "oxlint": "*",
+    "oxlint-tsgolint": "*",
+    "typescript": "*",
+    "vitest": "*"
+  },
   "dependencies": {
     "@hyperjump/json-pointer": "^1.1.2"
   }

@@ -1,0 +1,17 @@
+name: Node.js Automation
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+      - run: cd javascript && npm ci
+      - run: cd javascript && npm test
+      - run: cd javascript && npm run type-check
