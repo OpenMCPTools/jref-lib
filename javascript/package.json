@@ -4,7 +4,7 @@
   "description": "Parse and stringify for JSON Reference (JRef).",
   "main": "jref.js",
   "scripts": {
-    "test": "node src/tests.js",
+    "test": "vitest run",
     "lint": "oxlint",
     "type-check": "tsc --noEmit"
   },
