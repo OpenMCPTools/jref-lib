@@ -51,19 +51,24 @@ export const parse = (text, reviver) => {
 
 /** @type JSON["stringify"] */
 export const stringify = (value, replacer, space) => {
-  let map = new WeakMap();
-  let jrefReplacer = replacer;
-  if (replacer === undefined || replacer === null || typeof replacer == "function") {
-    jrefReplacer = function (key, val) {
-      const resultValue = replacer != null ? replacer(key, val) : val;
-      const isObj = resultValue !== null
-        && (typeof resultValue === "object" || typeof resultValue === "function");
-      const valueName = isObj ? map.get(resultValue) : undefined;
-      const jref = valueName !== undefined ? valueName.getPointer() : undefined;
+  /** @type WeakMap<object, any> */
+  const values = new WeakMap();
 
-      return jref !== undefined
-        ? { [JREF_PROPERTY_NAME]: "#" + encodeURI(jref).replace(/#/g, "%23") }
-        : (isObj && map.set(resultValue, new Name(key, map.get(this))), resultValue);
+  let jrefReplacer = replacer;
+  if (replacer === undefined || replacer === null || typeof replacer === "function") {
+    jrefReplacer = function (key, value) {
+      let replacedValue = typeof replacer === "function" ? replacer(key, value) : value;
+
+      if (typeof replacedValue === "object" && replacedValue !== null) {
+        const pointer = values.get(value)?.getPointer();
+        if (pointer !== undefined) {
+          return { [JREF_PROPERTY_NAME]: "#" + encodeURI(pointer).replace(/#/g, "%23") };
+        } else {
+          values.set(replacedValue, new Name(key, values.get(this)));
+        }
+      }
+
+      return replacedValue;
     };
   }
   // @ts-expect-error
