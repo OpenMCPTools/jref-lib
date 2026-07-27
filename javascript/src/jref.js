@@ -52,7 +52,7 @@ export const parse = (text, reviver) => {
 /** @type JSON["stringify"] */
 export const stringify = (value, replacer, space) => {
   if (Array.isArray(replacer)) {
-    throw Error("Array replacers are not implemented");
+    replacer = arrayReplacer(replacer);
   }
 
   /** @type WeakMap<object, any> */
@@ -73,6 +73,44 @@ export const stringify = (value, replacer, space) => {
     return replacedValue;
   }, space);
 };
+
+/**
+ * @param {(string | number)[]} replacer
+ */
+const arrayReplacer = (replacer) => {
+  /** @type Set<string> */
+  let propertyList = new Set();
+
+  for (const property of replacer) {
+    const type = typeof property;
+    if (type === "string" || type === "number") {
+      propertyList.add(String(property));
+    }
+  }
+
+  /**
+   * @param {string} _key
+   * @param {any} value
+   */
+  return (_key, value) => {
+    if (!isObject(value)) {
+      return value;
+    }
+
+    /** @type Record<string, any> */
+    const result = {};
+    for (const property in value) {
+      if (propertyList.has(property)) {
+        result[property] = value[property];
+      }
+    }
+
+    return result;
+  };
+};
+
+/** @type (value: any) => value is Record<string, any> */
+const isObject = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
 
 // Name class to hold onto name/parent Name
 // for objects and arrays
