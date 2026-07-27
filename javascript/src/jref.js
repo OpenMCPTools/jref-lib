@@ -26,15 +26,22 @@ export const parse = (text, reviver) => {
   for (const [value, { key, parent }] of references) {
     /** @type any */
     let target = value;
+    const visited = new Set();
+    while (target?.[JREF_PROPERTY_NAME] !== undefined) {
+      if (visited.has(target)) {
+        throw new Error(`Circular reference detected`);
+      }
+      visited.add(target);
 
-    // remove first character '#' local-only and decode URI syntax
-    const pointer = decodeURIComponent(value[JREF_PROPERTY_NAME].slice(1));
+      // remove first character '#' local-only and decode URI syntax
+      const pointer = decodeURIComponent(target[JREF_PROPERTY_NAME].slice(1));
 
-    // lookup/resolve ptr on root to get reference result
-    try {
-      target = JsonPointer.get(pointer, parsed);
-    } catch (error) {
-      throw new Error(`Jref pointer="${pointer}" could not be resolved`, { cause: error });
+      // lookup/resolve ptr on root to get reference result
+      try {
+        target = JsonPointer.get(pointer, parsed);
+      } catch (error) {
+        throw new Error(`Jref pointer="${pointer}" could not be resolved`, { cause: error });
+      }
     }
     parent[key] = target;
   }
