@@ -262,6 +262,30 @@ describe("JRef", () => {
     expect(() => JRef.parse(json)).toThrow("could not be resolved");
   });
 
+  test("ref to non-existent property on existing object throws", () => {
+    const json = `{
+      "a": { "x": 1 },
+      "b": { "$ref": "#/a/y" }
+    }`;
+    expect(() => JRef.parse(json)).toThrow("could not be resolved");
+  });
+
+  test("ref to out-of-bounds array index throws", () => {
+    const json = `{
+      "a": [1, 2, 3],
+      "b": { "$ref": "#/a/5" }
+    }`;
+    expect(() => JRef.parse(json)).toThrow("could not be resolved");
+  });
+
+  test("ref to non-existent nested property throws", () => {
+    const json = `{
+      "a": { "b": { "c": 1 } },
+      "d": { "$ref": "#/a/b/x" }
+    }`;
+    expect(() => JRef.parse(json)).toThrow("could not be resolved");
+  });
+
   test("deeply nested tree with replacer function", () => {
     const top = { name: "top", data: "root-data" };
     const child1 = { name: "child1", parent: top };
