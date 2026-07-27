@@ -383,4 +383,41 @@ describe("JRef", () => {
     expect(output.b).toBe("hello");
     expect(output.a).not.toBe(output.b);
   });
+
+  test("array replacer filters to only listed properties", () => {
+    const input = { a: 1, b: 2, c: 3 };
+
+    const json = JRef.stringify(input, ["a", "c"]);
+    const output = JRef.parse(json);
+
+    expect(output).toEqual({ a: 1, c: 3 });
+  });
+
+  test("array replacer filters nested objects", () => {
+    const input = { a: { x: 1, y: 2, z: 3 }, b: "keep" };
+
+    const json = JRef.stringify(input, ["a", "x"]);
+    const output = JRef.parse(json);
+
+    expect(output).toEqual({ a: { x: 1 } });
+  });
+
+  test("array replacer lets arrays pass through unfiltered", () => {
+    const input = { items: [1, 2, 3] };
+
+    const json = JRef.stringify(input, ["items"]);
+    const output = JRef.parse(json);
+
+    expect(output.items).toEqual([1, 2, 3]);
+  });
+
+  test("array replacers and numeric property names", () => {
+    const input = { 0: "zero", 1: "one", 2: "two" };
+
+    const json = JRef.stringify(input, [0, 2]);
+    const output = JRef.parse(json);
+
+    expect(output).toEqual({ 0: "zero", 2: "two" });
+    expect(output).not.toHaveProperty("1");
+  });
 });
