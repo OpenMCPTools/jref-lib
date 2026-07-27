@@ -347,4 +347,40 @@ describe("JRef", () => {
     }`;
     expect(() => JRef.parse(json)).toThrow("Circular reference detected");
   });
+
+  test("replacer that wraps objects preserves reference tracking", () => {
+    const shared = { x: 1 };
+    const input = { a: shared, b: shared };
+
+    const json = JRef.stringify(input, (_key, val) => {
+      if (val?.x !== undefined) {
+        return { ...val, wrapped: true };
+      }
+      return val;
+    });
+
+    expect(json).toHaveJRefCount(1);
+
+    const output = JRef.parse(json);
+    expect(output.a).toBe(output.b);
+    expect(output.a).toEqual({ x: 1, wrapped: true });
+  });
+
+  test("replacer that wraps numbers", () => {
+    const input = { a: 42, b: "hello" };
+
+    const json = JRef.stringify(input, (_key, val) => {
+      if (typeof val === "number") {
+        return { type: "number", value: String(val) };
+      }
+      return val;
+    });
+
+    expect(json).toHaveJRefCount(0);
+
+    const output = JRef.parse(json);
+    expect(output.a).toEqual({ type: "number", value: "42" });
+    expect(output.b).toBe("hello");
+    expect(output.a).not.toBe(output.b);
+  });
 });
