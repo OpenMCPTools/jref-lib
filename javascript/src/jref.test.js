@@ -420,4 +420,17 @@ describe("JRef", () => {
     expect(output).toEqual({ 0: "zero", 2: "two" });
     expect(output).not.toHaveProperty("1");
   });
+
+  test("array replacer preserves reference tracking", () => {
+    const shared = { name: "target", extra: "data" };
+    const input = { a: shared, b: shared };
+
+    const json = JRef.stringify(input, ["a", "b", "name"]);
+    expect(json).toHaveJRefCount(1);
+
+    const output = JRef.parse(json);
+    expect(output.a).toEqual({ name: "target" });
+    expect(output.b).toEqual({ name: "target" });
+    expect(output.a).toBe(output.b);
+  });
 });
