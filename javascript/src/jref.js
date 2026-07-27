@@ -65,8 +65,14 @@ export const stringify = (value, replacer, space) => {
       const pointer = values.get(value)?.getPointer();
       if (pointer !== undefined) {
         return { [JREF_PROPERTY_NAME]: "#" + encodeURI(pointer).replace(/#/g, "%23") };
-      } else if (typeof value === "object" && value !== null) {
-        values.set(value, new Name(key, values.get(this)));
+      } else {
+        const name = new Name(key, values.get(this));
+        if (typeof value === "object" && value !== null) {
+          values.set(value, name);
+        }
+        if (replacedValue !== value) {
+          values.set(replacedValue, name);
+        }
       }
     }
 
