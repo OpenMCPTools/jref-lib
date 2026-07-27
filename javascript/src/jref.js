@@ -63,20 +63,19 @@ export const stringify = (value, replacer, space) => {
   const values = new WeakMap();
 
   return JSON.stringify(value, function (key, value) {
-    let replacedValue = replacer ? replacer(key, value) : value;
+    const pointer = values.get(value)?.getPointer();
+    if (pointer !== undefined) {
+      return { [JREF_PROPERTY_NAME]: "#" + encodeURI(pointer).replace(/#/g, "%23") };
+    }
 
+    let replacedValue = replacer ? replacer(key, value) : value;
     if (typeof replacedValue === "object" && replacedValue !== null) {
-      const pointer = values.get(value)?.getPointer();
-      if (pointer !== undefined) {
-        return { [JREF_PROPERTY_NAME]: "#" + encodeURI(pointer).replace(/#/g, "%23") };
-      } else {
-        const name = new Name(key, values.get(this));
-        if (typeof value === "object" && value !== null) {
-          values.set(value, name);
-        }
-        if (replacedValue !== value) {
-          values.set(replacedValue, name);
-        }
+      const name = new Name(key, values.get(this));
+      if (typeof value === "object" && value !== null) {
+        values.set(value, name);
+      }
+      if (replacedValue !== value) {
+        values.set(replacedValue, name);
       }
     }
 
