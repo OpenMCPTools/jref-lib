@@ -1,5 +1,6 @@
 .github/
 oxlint.config.js
-src/tests.js
+src/**/*.test.js
+src/vitest.d.ts
 coverage/
 tsconfig.json
