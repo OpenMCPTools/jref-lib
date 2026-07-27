@@ -40,26 +40,6 @@ export const parse = (text, reviver) => {
 
 /** @type JSON["stringify"] */
 export const stringify = (value, replacer, space) => {
-  // Name class to hold onto name/parent Name
-  // for objects and arrays
-  class Name {
-    /**
-    * @param {string} name
-    * @param {Name} parent
-    */
-    constructor(name, parent) {
-      this.name = name;
-      this.parent = parent;
-    }
-
-    /** @type () => string */
-    getPointer() {
-      if (this.parent == null) {
-        return JsonPointer.nil;
-      }
-      return JsonPointer.append(this.name, this.parent.getPointer());
-    }
-  }
   let map = new WeakMap();
   let jrefReplacer = replacer;
   if (replacer === undefined || replacer === null || typeof replacer == "function") {
@@ -78,3 +58,24 @@ export const stringify = (value, replacer, space) => {
   // @ts-expect-error
   return JSON.stringify(value, jrefReplacer, space);
 };
+
+// Name class to hold onto name/parent Name
+// for objects and arrays
+class Name {
+  /**
+  * @param {string} name
+  * @param {Name} parent
+  */
+  constructor(name, parent) {
+    this.name = name;
+    this.parent = parent;
+  }
+
+  /** @type () => string */
+  getPointer() {
+    if (this.parent == null) {
+      return JsonPointer.nil;
+    }
+    return JsonPointer.append(this.name, this.parent.getPointer());
+  }
+}
