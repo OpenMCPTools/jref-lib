@@ -24,7 +24,7 @@ export const parse = (text, reviver) => {
     let target = value;
 
     // remove first character '#' local-only and decode URI syntax
-    const pointer = decodeURI(value[JREF_PROPERTY_NAME].slice(1));
+    const pointer = decodeURIComponent(value[JREF_PROPERTY_NAME].slice(1));
 
     // lookup/resolve ptr on root to get reference result
     try {
@@ -51,7 +51,7 @@ export const stringify = (value, replacer, space) => {
       const jref = valueName !== undefined ? valueName.getPointer() : undefined;
 
       return jref !== undefined
-        ? { [JREF_PROPERTY_NAME]: "#" + jref }
+        ? { [JREF_PROPERTY_NAME]: "#" + encodeURI(jref).replace(/#/g, "%23") }
         : (isObj && map.set(resultValue, new Name(key, map.get(this))), resultValue);
     };
   }

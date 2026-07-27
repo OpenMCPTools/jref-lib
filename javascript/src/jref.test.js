@@ -278,4 +278,37 @@ describe("JRef", () => {
     expect(output[3].parent).toBe(output[1]);
     expect(output[3].root).toBe(output[0]);
   });
+
+  test("parse decodes %23 in pointer paths", () => {
+    const json = `{
+      "data": { "a#b": 42 },
+      "ref": { "$ref": "#/data/a%23b" }
+    }`;
+    const output = JRef.parse(json);
+    expect(output.ref).toBe(42);
+  });
+
+  test("stringify encodes # in pointer paths", () => {
+    const target = { value: 1 };
+    const input = {
+      "a#b": target,
+      "a": target
+    };
+
+    const json = JRef.stringify(input);
+    expect(json).toContain(`"$ref":"#/a%23b`);
+
+    const output = JRef.parse(json);
+    expect(output.a).toBe(output["a#b"]);
+  });
+
+  test("round-trip with # in keys via properly-encoded input", () => {
+    const json = `{
+      "items": { "a#b": { "x": 1 } },
+      "link": { "$ref": "#/items/a%23b" }
+    }`;
+    const output = JRef.parse(json);
+    expect(output.link).toEqual({ x: 1 });
+    expect(output.link).toBe(output.items["a#b"]);
+  });
 });
