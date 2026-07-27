@@ -4,37 +4,38 @@ export const JREF_PROPERTY_NAME = "$ref";
 
 /** @type JSON["parse"] */
 export const parse = (text, reviver) => {
-  /** @type (root: any, current?: any) => any */
-  function resolvePtrs(root, current) {
-    // on first call, set current to root
-    if (current === undefined) {
-      current = root;
-    }
-    // If current is null or primitive (not object) just return it
-    if (current === null || typeof current != "object") {
-      return current;
+  /** @type Map<{ $ref: string }, { key: string, parent: Record<string, any>}> */
+  const references = new Map();
+
+  const parsed = JSON.parse(text, function (key, value) {
+    if (value?.[JREF_PROPERTY_NAME] !== undefined) {
+      references.set(value, { key, parent: this });
+
+      // Don't run the reviver on references
+      return value;
     }
 
-    // resolvePtrs of all key->value props in object (arrays included)
-    for (const [key, value] of Object.entries(current)) {
-      current[key] = resolvePtrs(root, value);
+    return reviver ? reviver(key, value) : value;
+  });
+
+  // Resolve references
+  for (const [value, { key, parent }] of references) {
+    /** @type any */
+    let target = value;
+
+    // remove first character '#' local-only and decode URI syntax
+    const pointer = decodeURI(value[JREF_PROPERTY_NAME].slice(1));
+
+    // lookup/resolve ptr on root to get reference result
+    try {
+      target = JsonPointer.get(pointer, parsed);
+    } catch (error) {
+      throw new Error(`Jref pointer="${pointer}" could not be resolved`, { cause: error });
     }
-    // if '$ref' property in current object
-    if (JREF_PROPERTY_NAME in current) {
-      // remove first character '#' local-only and decode URI syntax
-      const pointer = decodeURI(current[JREF_PROPERTY_NAME].slice(1));
-      // lookup/resolve ptr on root to get reference result
-      try {
-        return JsonPointer.get(pointer, root);
-      } catch (err) {
-        throw new Error(`Jref pointer="${pointer}" could not be resolved`, { cause: err });
-      }
-    }
-    return current;
+    parent[key] = target;
   }
 
-  // call JSON parse and then resolvePtrs
-  return resolvePtrs(JSON.parse(text, reviver));
+  return parsed;
 };
 
 /** @type JSON["stringify"] */
