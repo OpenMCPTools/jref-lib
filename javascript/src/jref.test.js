@@ -319,4 +319,32 @@ describe("JRef", () => {
     }`;
     expect(() => JRef.parse(json)).toThrow("Only local references are supported");
   });
+
+  test("reference chain", () => {
+    const json = `{
+      "a": { "$ref": "#/b" },
+      "b": { "$ref": "#/c" },
+      "c": { "value": 42 }
+    }`;
+    const output = JRef.parse(json);
+    expect(output.a).toEqual({ value: 42 });
+    expect(output.b).toEqual({ value: 42 });
+    expect(output.a).toBe(output.b);
+  });
+
+  test("self reference in parse", () => {
+    const json = `{
+      "a": { "$ref": "#/a" }
+    }`;
+    expect(() => JRef.parse(json)).toThrow("Circular reference detected");
+  });
+
+  test("reference cycle in parse", () => {
+    const json = `{
+      "a": { "$ref": "#/b" },
+      "b": { "$ref": "#/c" },
+      "c": { "$ref": "#/a" }
+    }`;
+    expect(() => JRef.parse(json)).toThrow("Circular reference detected");
+  });
 });
