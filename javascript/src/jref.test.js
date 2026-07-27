@@ -390,6 +390,27 @@ describe("JRef", () => {
     expect(output.a).toEqual({ x: 1, wrapped: true });
   });
 
+  test("replacer should not run multiple times for referenced values", () => {
+    const shared = { x: 1 };
+    const input = { a: shared, b: shared };
+
+    let callCount = 0;
+    const json = JRef.stringify(input, (_key, value) => {
+      if (value?.x !== undefined) {
+        return { x: value.x, id: ++callCount };
+      }
+      return value;
+    });
+
+    expect(json).toHaveJRefCount(1);
+
+    const output = JRef.parse(json);
+    expect(output.a).toEqual({ x: 1, id: 1 });
+    expect(output.b).toEqual({ x: 1, id: 1 });
+    expect(output.a).toBe(output.b);
+    expect(callCount).toBe(1);
+  });
+
   test("replacer that wraps numbers", () => {
     const input = { a: 42, b: "hello" };
 
