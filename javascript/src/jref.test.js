@@ -311,4 +311,12 @@ describe("JRef", () => {
     expect(output.link).toEqual({ x: 1 });
     expect(output.link).toBe(output.items["a#b"]);
   });
+
+  test("ref without hash prefix throws", () => {
+    const json = `{
+      "a": { "value": 42 },
+      "b": { "$ref": "x/a" }
+    }`;
+    expect(() => JRef.parse(json)).toThrow("Only local references are supported");
+  });
 });
