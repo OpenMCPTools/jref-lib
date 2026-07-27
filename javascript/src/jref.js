@@ -40,7 +40,11 @@ export const parse = (text, reviver) => {
       try {
         target = JsonPointer.get(pointer, parsed);
       } catch (error) {
-        throw new Error(`Jref pointer="${pointer}" could not be resolved`, { cause: error });
+        throw new Error(`JSON Pointer="${pointer}" could not be resolved`, { cause: error });
+      }
+
+      if (target === undefined) {
+        throw new Error(`JSON Pointer="${pointer}" could not be resolved`);
       }
     }
     parent[key] = target;
