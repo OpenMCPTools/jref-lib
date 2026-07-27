@@ -51,28 +51,27 @@ export const parse = (text, reviver) => {
 
 /** @type JSON["stringify"] */
 export const stringify = (value, replacer, space) => {
+  if (Array.isArray(replacer)) {
+    throw Error("Array replacers are not implemented");
+  }
+
   /** @type WeakMap<object, any> */
   const values = new WeakMap();
 
-  let jrefReplacer = replacer;
-  if (replacer === undefined || replacer === null || typeof replacer === "function") {
-    jrefReplacer = function (key, value) {
-      let replacedValue = typeof replacer === "function" ? replacer(key, value) : value;
+  return JSON.stringify(value, function (key, value) {
+    let replacedValue = replacer ? replacer(key, value) : value;
 
-      if (typeof replacedValue === "object" && replacedValue !== null) {
-        const pointer = values.get(value)?.getPointer();
-        if (pointer !== undefined) {
-          return { [JREF_PROPERTY_NAME]: "#" + encodeURI(pointer).replace(/#/g, "%23") };
-        } else {
-          values.set(replacedValue, new Name(key, values.get(this)));
-        }
+    if (typeof replacedValue === "object" && replacedValue !== null) {
+      const pointer = values.get(value)?.getPointer();
+      if (pointer !== undefined) {
+        return { [JREF_PROPERTY_NAME]: "#" + encodeURI(pointer).replace(/#/g, "%23") };
+      } else {
+        values.set(replacedValue, new Name(key, values.get(this)));
       }
+    }
 
-      return replacedValue;
-    };
-  }
-  // @ts-expect-error
-  return JSON.stringify(value, jrefReplacer, space);
+    return replacedValue;
+  }, space);
 };
 
 // Name class to hold onto name/parent Name
