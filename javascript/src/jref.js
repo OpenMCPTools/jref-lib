@@ -9,6 +9,10 @@ export const parse = (text, reviver) => {
 
   const parsed = JSON.parse(text, function (key, value) {
     if (value?.[JREF_PROPERTY_NAME] !== undefined) {
+      if (!value[JREF_PROPERTY_NAME].startsWith("#")) {
+        throw Error(`Only local references are supported. Found reference, ${value[JREF_PROPERTY_NAME]}`);
+      }
+
       references.set(value, { key, parent: this });
 
       // Don't run the reviver on references
