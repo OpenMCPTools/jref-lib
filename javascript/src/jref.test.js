@@ -479,6 +479,30 @@ describe("JRef", () => {
     expect(output.a).toBe(output.b);
   });
 
+  test("replacer returning the same object for different inputs should produce refs", () => {
+    const replacement = { z: 99 };
+    const input = { a: { x: 1 }, b: { y: 2 } };
+
+    const json = JRef.stringify(input, (_key, val) => {
+      if (val?.x) {
+        return replacement;
+      }
+
+      if (val?.y) {
+        return replacement;
+      }
+
+      return val;
+    });
+
+    expect(json).toHaveJRefCount(1);
+
+    const output = JRef.parse(json);
+    expect(output.a).toEqual({ z: 99 });
+    expect(output.b).toEqual({ z: 99 });
+    expect(output.a).toBe(output.b);
+  });
+
   test("don't run reviver on references", () => {
     const json = `{
       "a": { "x": 1 },
