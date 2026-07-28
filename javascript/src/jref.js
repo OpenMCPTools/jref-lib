@@ -41,12 +41,11 @@ export const parse = (text, reviver) => {
       // lookup/resolve ptr on root to get reference result
       try {
         target = JsonPointer.get(pointer, parsed);
+        if (target === undefined || pointer.includes(JREF_PROPERTY_NAME)) {
+          throw new Error("No such location");
+        }
       } catch (error) {
         throw new Error(`JSON Pointer="${pointer}" could not be resolved`, { cause: error });
-      }
-
-      if (target === undefined) {
-        throw new Error(`JSON Pointer="${pointer}" could not be resolved`);
       }
     }
     parent[key] = target;

@@ -503,6 +503,15 @@ describe("JRef", () => {
     expect(output.a).toBe(output.b);
   });
 
+  test("pointer should fail when traversing inside a reference object", () => {
+    const json = `{
+      "a": { "$ref": "#/b/$ref" },
+      "b": { "$ref": "#/c" },
+      "c": 42
+    }`;
+    expect(() => JRef.parse(json)).toThrow("could not be resolved");
+  });
+
   test("don't run reviver on references", () => {
     const json = `{
       "a": { "x": 1 },
