@@ -478,4 +478,21 @@ describe("JRef", () => {
     expect(output.b).toEqual({ name: "target" });
     expect(output.a).toBe(output.b);
   });
+
+  test("don't run reviver on references", () => {
+    const json = `{
+      "a": { "x": 1 },
+      "b": { "$ref": "#/a" }
+    }`;
+
+    let hasRefKey = false;
+    JRef.parse(json, (key, value) => {
+      if (key === "$ref") {
+        hasRefKey = true;
+      }
+      return value;
+    });
+
+    expect(hasRefKey).toBe(false);
+  });
 });
