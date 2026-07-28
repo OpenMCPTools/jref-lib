@@ -14,7 +14,9 @@ export const parse = (text, reviver) => {
       }
 
       references.set(value, { key, parent: this });
+    }
 
+    if (this?.[JREF_PROPERTY_NAME] !== undefined) {
       // Don't run the reviver on references
       return value;
     }
