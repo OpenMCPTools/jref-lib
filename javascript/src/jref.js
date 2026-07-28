@@ -8,24 +8,22 @@ export const parse = (text, reviver) => {
   const references = new Map();
 
   const parsed = JSON.parse(text, function (key, value) {
-    if (value?.[JREF_PROPERTY_NAME] !== undefined) {
-      if (!value[JREF_PROPERTY_NAME].startsWith("#")) {
-        throw Error(`Only local references are supported. Found reference, ${value[JREF_PROPERTY_NAME]}`);
-      }
-
-      references.set(value, { key, parent: this });
-    }
-
     if (this?.[JREF_PROPERTY_NAME] !== undefined) {
-      // Drop any properties in a reference object that aren't $ref
       for (const key in this) {
         if (key !== JREF_PROPERTY_NAME) {
           delete this[key];
         }
       }
 
-      // Don't run the reviver on references
       return value;
+    }
+
+    if (value?.[JREF_PROPERTY_NAME] !== undefined) {
+      if (!value[JREF_PROPERTY_NAME].startsWith("#")) {
+        throw Error(`Only local references are supported. Found reference, ${value[JREF_PROPERTY_NAME]}`);
+      }
+
+      references.set(value, { key, parent: this });
     }
 
     return reviver ? reviver(key, value) : value;
@@ -67,29 +65,28 @@ export const stringify = (value, replacer, space) => {
     replacer = arrayReplacer(replacer);
   }
 
-  /** @type WeakMap<object, any> */
+  /** @type WeakMap<object, string> */
   const values = new WeakMap();
 
   return JSON.stringify(value, function (key, value) {
-    const pointer = values.get(value)?.getPointer();
+    const pointer = values.get(value);
     if (pointer !== undefined) {
-      return { [JREF_PROPERTY_NAME]: "#" + encodeURI(pointer).replace(/#/g, "%23") };
+      return { [JREF_PROPERTY_NAME]: encodeRef(pointer) };
     }
 
     let replacedValue = replacer ? replacer(key, value) : value;
 
-    const replacedPointer = values.get(replacedValue)?.getPointer();
+    const replacedPointer = values.get(replacedValue);
     if (replacedPointer !== undefined) {
-      return { [JREF_PROPERTY_NAME]: "#" + encodeURI(replacedPointer).replace(/#/g, "%23") };
+      return { [JREF_PROPERTY_NAME]: encodeRef(replacedPointer) };
     }
 
     if (typeof replacedValue === "object" && replacedValue !== null) {
-      const name = new Name(key, values.get(this));
-      if (typeof value === "object" && value !== null) {
-        values.set(value, name);
-      }
-      if (replacedValue !== value) {
-        values.set(replacedValue, name);
+      const parentPointer = values.get(this);
+      const pointer = parentPointer === undefined ? JsonPointer.nil : JsonPointer.append(key, parentPointer);
+      values.set(replacedValue, pointer);
+      if (typeof value === "object" && value !== null && value !== replacedValue) {
+        values.set(value, pointer);
       }
     }
 
@@ -132,26 +129,13 @@ const arrayReplacer = (replacer) => {
   };
 };
 
-/** @type (value: any) => value is Record<string, any> */
+/**
+ * @param {string} pointer
+ */
+const encodeRef = (pointer) => "#" + encodeURI(pointer).replace(/#/g, "%23");
+
+/**
+ * @param {any} value
+ * @returns {value is Record<string, any>}
+ */
 const isObject = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
-
-// Name class to hold onto name/parent Name
-// for objects and arrays
-class Name {
-  /**
-  * @param {string} name
-  * @param {Name} parent
-  */
-  constructor(name, parent) {
-    this.name = name;
-    this.parent = parent;
-  }
-
-  /** @type () => string */
-  getPointer() {
-    if (this.parent == null) {
-      return JsonPointer.nil;
-    }
-    return JsonPointer.append(this.name, this.parent.getPointer());
-  }
-}
