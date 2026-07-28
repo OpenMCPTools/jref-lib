@@ -512,6 +512,16 @@ describe("JRef", () => {
     expect(() => JRef.parse(json)).toThrow("could not be resolved");
   });
 
+  test("extra properties on ref objects should not be resolved", () => {
+    const json = `{
+      "a": { "$ref": "#/b" },
+      "b": { "$ref": "#/c", "x": { "y": { "$ref": "#/nonexistent" } } },
+      "c": 42
+    }`;
+    const result = JRef.parse(json);
+    expect(result.a).toBe(42);
+  });
+
   test("don't run reviver on references", () => {
     const json = `{
       "a": { "x": 1 },

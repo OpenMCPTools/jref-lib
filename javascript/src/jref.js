@@ -17,6 +17,13 @@ export const parse = (text, reviver) => {
     }
 
     if (this?.[JREF_PROPERTY_NAME] !== undefined) {
+      // Drop any properties in a reference object that aren't $ref
+      for (const key in this) {
+        if (key !== JREF_PROPERTY_NAME) {
+          delete this[key];
+        }
+      }
+
       // Don't run the reviver on references
       return value;
     }
