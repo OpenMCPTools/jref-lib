@@ -562,4 +562,38 @@ describe("JRef", () => {
     }`;
     expect(() => JRef.parse(json)).toThrow("Reference value must be a string");
   });
+
+  test("reviver that replaces a reference is respected", () => {
+    const json = `{
+      "a": 42,
+      "b": { "$ref": "#/a" }
+    }`;
+
+    const result = JRef.parse(json, (key, value) => {
+      if (value?.$ref) {
+        return { transformed: true };
+      }
+      return value;
+    });
+
+    expect(result.b).toEqual({ transformed: true });
+    expect(result.b).not.toBe(42);
+  });
+
+  test("reviver that removes a reference is respected", () => {
+    const json = `{
+      "a": 42,
+      "b": { "$ref": "#/a" }
+    }`;
+
+    const result = JRef.parse(json, (key, value) => {
+      if (value?.$ref) {
+        return undefined;
+      }
+      return value;
+    });
+
+    expect(result.a).toBe(42);
+    expect(result.b).toBeUndefined();
+  });
 });

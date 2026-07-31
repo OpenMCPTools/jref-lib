@@ -34,6 +34,11 @@ export const parse = (text, reviver) => {
 
   // Resolve references
   for (const [value, { key, parent }] of references) {
+    // Skip resolution if the reviver replaced the reference object
+    if (parent[key] !== value) {
+      continue;
+    }
+
     /** @type any */
     let target = value;
     const visited = new Set();
