@@ -19,6 +19,9 @@ export const parse = (text, reviver) => {
     }
 
     if (value?.[JREF_PROPERTY_NAME] !== undefined) {
+      if (typeof value[JREF_PROPERTY_NAME] !== "string") {
+        throw new Error(`Reference value must be a string. Found ${typeof value[JREF_PROPERTY_NAME]}`);
+      }
       if (!value[JREF_PROPERTY_NAME].startsWith("#")) {
         throw Error(`Only local references are supported. Found reference, ${value[JREF_PROPERTY_NAME]}`);
       }

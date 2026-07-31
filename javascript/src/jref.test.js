@@ -538,4 +538,28 @@ describe("JRef", () => {
 
     expect(hasRefKey).toBe(false);
   });
+
+  test("non-string $ref value throws descriptive error", () => {
+    const json = `{
+      "a": 42,
+      "b": { "$ref": 123 }
+    }`;
+    expect(() => JRef.parse(json)).toThrow("Reference value must be a string");
+  });
+
+  test("boolean $ref value throws descriptive error", () => {
+    const json = `{
+      "a": 42,
+      "b": { "$ref": true }
+    }`;
+    expect(() => JRef.parse(json)).toThrow("Reference value must be a string");
+  });
+
+  test("null $ref value throws descriptive error", () => {
+    const json = `{
+      "a": 42,
+      "b": { "$ref": null }
+    }`;
+    expect(() => JRef.parse(json)).toThrow("Reference value must be a string");
+  });
 });
