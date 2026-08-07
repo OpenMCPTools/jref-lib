@@ -1,7 +1,7 @@
 
 # jref-lib js
 
-A lightweight JavaScript utility for efficiently `stringify` and `parse` JSON with support for complex structures (e.g. trees and graphs) using JSON Pointers specification ([rfc 6901](https://datatracker.ietf.org/doc/html/rfc6901)) and the local-only [JSON Reference (JREF)](https://github.com/json-schema-org/referencing/blob/main/jdesrosiers-jref.md) specification.
+A lightweight JavaScript utility for efficiently `stringify` and `parse` JSON with support for complex structures (e.g. trees and some graphs) using JSON Pointers specification ([rfc 6901](https://datatracker.ietf.org/doc/html/rfc6901)) and the local-only [JSON Reference (JREF)](https://github.com/json-schema-org/referencing/blob/main/jdesrosiers-jref.md) specification.
 
 ---
 ## Overview
@@ -10,6 +10,8 @@ Standard `JSON.stringify` inefficiently duplicates object data when the same ins
 1.  **Efficiently serializing duplicate references**: For complex data structures (e.g. trees and other graphs) replacing memory references with JSON pointers will frequently result in less data and more efficient network transmission.  
 2.  **Handling circularity**: Safely serializing and parsing objects that point back to themselves.
 3.  **Restoring object identity on deserialization**: Ensuring that after parsing, multiple references to the same original object point to the same memory instance.
+
+NOTE: Complex object graphs cannot be fully represented by JREF.stringify output (a tree). It's therefore necessary for JRef input to be constrained by the use case. For example, data structures with cycles should usually be transformed prior to being serialized. [Here](https://github.com/douglascrockford/JSON-js/blob/master/cycle.js) is a utility to support some such transformations.
 
 ---
 ## Installation
@@ -41,7 +43,7 @@ in [ECMAscript 2027 JSON documentation](https://tc39.es/ecma262/multipage/struct
 
 ## Usage Examples
 
-### 1. Handling Circular References
+### 1. Circular References
 Standard `JSON.stringify` throws a `TypeError` on circular structures. `jref-js` handles them seamlessly.
 
 ```javascript
@@ -76,7 +78,7 @@ const parsed = JRef.parse(json);
 console.log(parsed.config === parsed.settings); // true
 ```
 
-### 3. Efficiently Transmitting Multi-Level Tree
+### 3. Efficient Tree Serialization/Deserialization
 
 ```javascript
 // JREF stringify and parse

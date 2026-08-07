@@ -9,18 +9,15 @@ where the URL fragment is a JSON Pointer ([rfc-6901](https://datatracker.ietf.or
 locating a position in the document. As open specifications, JRef+JSON Pointer 
 provide cross-language inter-operability for references.
 
-Duplicated data are common in complex data structures (e.g. trees and other graphs). If such data
-are serialized (e.g. for network transmission) then usage of JRef+JSON Pointers 
+Duplicated data via references are common in complex data structures (e.g. trees). If such data
+are serialized (e.g. for network transmission and parsing) then usage of JRef+JSON Pointers 
 can be much more efficient.
 
-The JRef specification can be used to reference locations in external documents as well, but the current
-implementations only supports references local to the current document (local-only). In most cases, 
-the jref-lib implementations below can be easily enhanced to support remote references.
-
-See the
+The JRef specification allows reference to refer to external documents as well, but the current
+implementations only supports references local to the current document (local-only). See the
 [JRef Specification](https://github.com/hyperjump-io/json-reference/blob/main/spec.md)
 for more information on the full specification and
-[@hyperjump/browser](https://github.com/hyperjump-io/browser) for a full
+[@hyperjump/browser](https://github.com/hyperjump-io/browser) for an 
 implementation supporting external references.
 
 ## What is jref-lib?
