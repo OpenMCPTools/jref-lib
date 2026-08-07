@@ -121,6 +121,8 @@ parsed[1].friend === parsed[0]=false
 parsed[2].friend === parsed[0]=false
 ```
 
+This example also can be found in [examples/ex2.js](examples/ex2.js).  
+
 ### 3. Using Replacers and Revivers
 You can still use [standard JSON features]() with JRef like replacer functions.
 
