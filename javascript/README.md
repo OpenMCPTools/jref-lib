@@ -1,6 +1,6 @@
 # jref-lib js
 
-A lightweight JavaScript utility for efficiently stringifying and parsing JSON with support for complex structures (e.g. trees and some graphs) using the JSON Pointers specification ([RFC 6901](https://datatracker.ietf.org/doc/html/rfc6901)) and the local-only [JSON Reference (JREF)](https://github.com/json-schema-org/referencing/blob/main/jdesrosiers-jref.md) specification.
+A lightweight JavaScript utility for efficiently stringifying and parsing JSON with support for complex structures (e.g. trees and some graphs) using the JSON Pointers specification ([RFC 6901](https://datatracker.ietf.org/doc/html/rfc6901)) and the local-only [JSON Reference (JREF)](https://github.com/hyperjump-io/json-reference/blob/main/spec.md) specification.
 
 ## Overview
 
