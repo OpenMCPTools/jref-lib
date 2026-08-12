@@ -1,8 +1,15 @@
 {
-  "name": "@OpenMCPTools/JRef",
+  "name": "@openmcptools/jref",
   "version": "1.0.0",
   "description": "Parse and stringify for JSON Reference (JRef).",
-  "main": "jref.js",
+  "main": "src/jref.js",
+  "types": "src/jref.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/jref.d.ts",
+      "default": "./src/jref.js"
+    }
+  },
   "scripts": {
     "test": "vitest run",
     "lint": "oxlint",

@@ -1,6 +1,6 @@
 import * as JsonPointer from "@hyperjump/json-pointer";
 
-export const JREF_PROPERTY_NAME = "$ref";
+const JREF_PROPERTY_NAME = "$ref";
 
 /** @type JSON["parse"] */
 export const parse = (text, reviver) => {

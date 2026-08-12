@@ -1,6 +1,7 @@
 .github/
-oxlint.config.js
+oxlint.config.ts
 src/**/*.test.js
 src/vitest.d.ts
 coverage/
+examples/
 tsconfig.json
