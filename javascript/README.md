@@ -12,7 +12,7 @@ Standard `JSON.stringify` inefficiently duplicates object data when the same ins
 ## Installation
 
 ```bash
-npm install @opencmptools/jref
+npm install @openmcptools/jref
 ```
 
 ## API Reference
