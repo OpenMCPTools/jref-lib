@@ -37,6 +37,6 @@
     "vitest": "*"
   },
   "dependencies": {
-    "@hyperjump/json-pointer": "^1.1.2"
+    "@hyperjump/json-pointer": "^2.0.1"
   }
 }
